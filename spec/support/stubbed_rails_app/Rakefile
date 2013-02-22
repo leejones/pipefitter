@@ -1,0 +1,12 @@
+#!/usr/bin/env rake
+require 'fileutils'
+
+namespace :assets do
+  task :precompile do
+    rails_root = File.expand_path('..', __FILE__)
+    asset_root = File.join(rails_root, 'public', 'assets')
+    FileUtils.mkdir_p(File.join(asset_root))
+    FileUtils.touch(File.join(asset_root, 'manifest.yml'))
+  end
+end
+
