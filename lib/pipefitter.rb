@@ -4,17 +4,20 @@ require 'fileutils'
 class Pipefitter
   autoload 'Compiler', 'pipefitter/compiler'
   autoload 'Checksum', 'pipefitter/checksum'
+  autoload 'Compressor', 'pipefitter/compressor'
 
   attr_reader :base_path
 
-  def initialize(base_path)
+  def initialize(base_path, options = {})
     @base_path = base_path
+    @archive = options.fetch(:archive, true)
   end
 
   def compile
     setup
     if assets_need_compiling?
       compile_and_record_checksum
+      archive
     end
   end
 
@@ -38,12 +41,26 @@ class Pipefitter
     end
   end
 
+  def archive
+    if archiving_enabled?
+      compressor.compress("#{checksum}.tar.gz")
+    end
+  end
+
   def compiler
     @compiler ||= Compiler.new(base_path)
   end
 
+  def compressor
+    @compressor ||= Compressor.new(base_path)
+  end
+
   def assets_need_compiling?
     previous_checksum != checksum
+  end
+
+  def archiving_enabled?
+    @archive
   end
 
   def checksum_directory

@@ -17,6 +17,13 @@ describe Pipefitter do
       File.new('/tmp/pipefitter_tests/stubbed_rails_app/tmp/pipefitter/checksum.txt', 'r').read.should eql('63af33df99e1f88bff6d3696f4ae6686')
     end
 
+    it 'stores a compressed copy of the compiled assets' do
+      Pipefitter.compile('/tmp/pipefitter_tests/stubbed_rails_app')
+      File.exists?('/tmp/pipefitter_tests/stubbed_rails_app/tmp/pipefitter/63af33df99e1f88bff6d3696f4ae6686.tar.gz').should be_true
+      `cd /tmp/pipefitter_tests && tar -xzf /tmp/pipefitter_tests/stubbed_rails_app/tmp/pipefitter/63af33df99e1f88bff6d3696f4ae6686.tar.gz`
+      `find /tmp/pipefitter_tests/assets -type f -exec md5 -q {} + | md5 -q`.strip.should eql(`find /tmp/pipefitter_tests/stubbed_rails_app/public/assets -type f -exec md5 -q {} + | md5 -q`.strip)
+    end
+
     it 'only compiles when needed' do
       FileUtils.mkdir_p('/tmp/pipefitter_tests/stubbed_rails_app/tmp/pipefitter')
       File.open('/tmp/pipefitter_tests/stubbed_rails_app/tmp/pipefitter/checksum.txt', 'w+') { |f| f.write('63af33df99e1f88bff6d3696f4ae6686') }

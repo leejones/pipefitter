@@ -6,7 +6,9 @@ namespace :assets do
     rails_root = File.expand_path('..', __FILE__)
     asset_root = File.join(rails_root, 'public', 'assets')
     FileUtils.mkdir_p(File.join(asset_root))
-    FileUtils.touch(File.join(asset_root, 'manifest.yml'))
+    File.open(File.join(asset_root, 'manifest.yml'), 'w+') do |file|
+      file.write('list of compiled assets...')
+    end
   end
 end
 
