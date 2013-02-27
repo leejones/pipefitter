@@ -1,5 +1,6 @@
 require File.expand_path('../../lib/pipefitter.rb', __FILE__)
 require 'fileutils' 
+require 'yaml'
 
 describe Pipefitter do
   before(:each) do
@@ -14,7 +15,8 @@ describe Pipefitter do
 
     it 'records a checksum' do
       Pipefitter.compile('/tmp/pipefitter_tests/stubbed_rails_app')
-      File.new('/tmp/pipefitter_tests/stubbed_rails_app/tmp/pipefitter/checksum.txt', 'r').read.should eql('63af33df99e1f88bff6d3696f4ae6686')
+      checksums = YAML.load_file('/tmp/pipefitter_tests/stubbed_rails_app/tmp/pipefitter/inventory.yml')
+      checksums.has_key?('63af33df99e1f88bff6d3696f4ae6686').should be_true
     end
 
     it 'stores a compressed copy of the compiled assets' do
@@ -49,7 +51,14 @@ describe Pipefitter do
 
   describe Pipefitter::Checksum do
     it 'checksums a group of files and directories' do
-      checksum = Pipefitter::Checksum.new('/tmp/pipefitter_tests/stubbed_rails_app')
+      paths = %w{
+        Gemfile
+        Gemfile.lock
+        app/assets
+        lib/assets
+        vendor/assets
+      }.map { |p| File.join('/tmp/pipefitter_tests/stubbed_rails_app', p) }
+      checksum = Pipefitter::Checksum.new(paths)
       checksum.checksum.should eql('63af33df99e1f88bff6d3696f4ae6686')
     end
   end

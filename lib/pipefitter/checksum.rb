@@ -1,24 +1,32 @@
+require 'pipefitter/error'
+
 class Pipefitter
   class Checksum
-    attr_reader :base_path
+    attr_reader :paths
 
-    def initialize(base_path, paths = nil)
-      @base_path = base_path
+    def initialize(paths)
       @paths = paths
     end
 
+    def self.checksum(paths)
+      new(paths).checksum
+    end
+
     def checksum
+      verify_paths
       `find #{paths.join(' ')} -type f -exec md5 -q {} + | md5 -q`.strip
     end
 
-    def paths
-      @paths ||= default_paths
-    end
+    private
 
-    def default_paths
-      %w{./Gemfile ./Gemfile.lock app/assets lib/assets vendor/assets}.map do |path|
-        File.join(base_path, path)
+    def verify_paths
+      paths.each do |path|
+        unless File.exists?(path)
+          raise PathNotFound, "Could not find #{path}"
+        end
       end
     end
+
+    class PathNotFound < Pipefitter::Error; end
   end
 end

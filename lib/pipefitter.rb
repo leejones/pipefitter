@@ -5,6 +5,8 @@ class Pipefitter
   autoload 'Compiler', 'pipefitter/compiler'
   autoload 'Checksum', 'pipefitter/checksum'
   autoload 'Compressor', 'pipefitter/compressor'
+  autoload 'Inventory', 'pipefitter/inventory'
+  autoload 'Error', 'pipefitter/error'
 
   attr_reader :base_path
 
@@ -25,17 +27,19 @@ class Pipefitter
     Pipefitter.new(base_path).compile
   end
 
-  def checksum
-    @checksum ||= Checksum.new(base_path).checksum
+  def source_checksum
+    Checksum.checksum(source_paths)
+  end
+
+  def artifact_checksum
+    Checksum.checksum(artifact_paths)
   end
 
   private
 
   def compile_and_record_checksum
     if compiler.compile
-      File.open(checksum_file, 'w+') do |file|
-        file.write(checksum)
-      end
+      inventory.put(source_checksum, artifact_checksum)
     else
       raise CompilationError
     end
@@ -43,7 +47,7 @@ class Pipefitter
 
   def archive
     if archiving_enabled?
-      compressor.compress("#{checksum}.tar.gz")
+      compressor.compress("#{source_checksum}.tar.gz")
     end
   end
 
@@ -55,34 +59,42 @@ class Pipefitter
     @compressor ||= Compressor.new(base_path)
   end
 
+  def inventory
+    @inventory ||= Inventory.new(workspace)
+  end
+
   def assets_need_compiling?
-    previous_checksum != checksum
+    inventory.get(source_checksum) != artifact_checksum
   end
 
   def archiving_enabled?
     @archive
   end
 
-  def checksum_directory
+  def workspace
     File.join(base_path, 'tmp', 'pipefitter')
   end
 
-  def checksum_file
-    File.join(checksum_directory, 'checksum.txt')
-  end
-
-  def previous_checksum
-    if File.exists?(checksum_file)
-      File.read(checksum_file)
-    else
-      nil
-    end
-  end
-
   def setup
-    FileUtils.mkdir_p(checksum_directory)
+    FileUtils.mkdir_p(workspace)
+    FileUtils.mkdir_p(File.join(base_path, 'public', 'assets'))
   end
 
-  class Error < RuntimeError; end
-  class CompilationError < Error; end
+  def source_paths
+    paths = %w{
+      Gemfile
+      Gemfile.lock
+      app/assets
+      lib/assets
+      vendor/assets
+    }.map { |p| File.join(base_path, p) }
+  end
+
+  def artifact_paths
+    %w{
+      public/assets
+    }.map { |p| File.join(base_path, p) }
+  end
+
+  class CompilationError < Pipefitter::Error; end
 end
