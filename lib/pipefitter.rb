@@ -12,7 +12,7 @@ class Pipefitter
 
   def initialize(base_path, options = {})
     @base_path = base_path
-    @archive = options.fetch(:archive, true)
+    @archive = options.fetch(:archive, false)
   end
 
   def compile
@@ -23,8 +23,8 @@ class Pipefitter
     end
   end
 
-  def self.compile(base_path)
-    Pipefitter.new(base_path).compile
+  def self.compile(base_path, options = {})
+    Pipefitter.new(base_path, options).compile
   end
 
   def source_checksum
