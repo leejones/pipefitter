@@ -10,6 +10,10 @@ class Pipefitter
 
   attr_reader :base_path
 
+  def self.compile(base_path, options = {})
+    Pipefitter.new(base_path, options).compile
+  end
+
   def initialize(base_path, options = {})
     @base_path = base_path
     @archive = options.fetch(:archive, false)
@@ -21,10 +25,6 @@ class Pipefitter
       compile_and_record_checksum
       archive
     end
-  end
-
-  def self.compile(base_path, options = {})
-    Pipefitter.new(base_path, options).compile
   end
 
   def source_checksum

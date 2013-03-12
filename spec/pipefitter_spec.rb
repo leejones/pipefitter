@@ -28,10 +28,15 @@ describe Pipefitter do
 
     it 'only compiles when needed' do
       FileUtils.mkdir_p('/tmp/pipefitter_tests/stubbed_rails_app/tmp/pipefitter')
-      File.open('/tmp/pipefitter_tests/stubbed_rails_app/tmp/pipefitter/checksum.txt', 'w+') { |f| f.write('63af33df99e1f88bff6d3696f4ae6686') }
+      File.open('/tmp/pipefitter_tests/stubbed_rails_app/tmp/pipefitter/inventory.yml', 'w+') do |file|
+        file.write({
+          '63af33df99e1f88bff6d3696f4ae6686' => 'd41d8cd98f00b204e9800998ecf8427e'
+        }.to_yaml)
+      end
       compiler_stub = stub
       Pipefitter::Compiler.stub(:new => compiler_stub)
       compiler_stub.should_not_receive(:compile)
+      Pipefitter.compile('/tmp/pipefitter_tests/stubbed_rails_app')
     end
 
     it 'does not record a checksum if the compile fails' do
