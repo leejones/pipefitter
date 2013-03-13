@@ -5,7 +5,7 @@ class Pipefitter
     attr_reader :paths
 
     def initialize(paths)
-      @paths = paths
+      @paths = Array(paths)
     end
 
     def self.checksum(paths)

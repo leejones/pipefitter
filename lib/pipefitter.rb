@@ -21,7 +21,9 @@ class Pipefitter
 
   def compile
     setup
-    if assets_need_compiling?
+    if inventory_contains_compiled_assets?
+      move_archived_assets_into_place
+    elsif assets_need_compiling?
       compile_and_record_checksum
       archive
     end
@@ -77,7 +79,7 @@ class Pipefitter
 
   def setup
     FileUtils.mkdir_p(workspace)
-    FileUtils.mkdir_p(File.join(base_path, 'public', 'assets'))
+    artifact_paths.each { |path| FileUtils.mkdir_p(path) }
   end
 
   def source_paths
@@ -94,6 +96,21 @@ class Pipefitter
     %w{
       public/assets
     }.map { |p| File.join(base_path, p) }
+  end
+
+  def inventory_contains_compiled_assets?
+    inventory_path = File.join(workspace, "#{source_checksum}.tar.gz")
+    inventory.get(source_checksum) && File.exists?(inventory_path)
+  end
+
+  def move_archived_assets_into_place
+    inventory_path = File.join(workspace, "#{source_checksum}.tar.gz")
+    FileUtils.rm_rf("#{base_path}/public/assets")
+    `cd #{base_path}/public && tar -xzf #{inventory_path}`
+    expected_artifact_checksum = inventory.get(source_checksum)
+    if expected_artifact_checksum != artifact_checksum
+      raise CompilationError, 'Archived assets did match stored checksum!'
+    end
   end
 
   class CompilationError < Pipefitter::Error; end
