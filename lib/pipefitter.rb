@@ -11,7 +11,7 @@ class Pipefitter
   attr_reader :base_path
 
   def self.compile(base_path, options = {})
-    Pipefitter.new(base_path, options).compile
+    new(base_path, options).compile
   end
 
   def initialize(base_path, options = {})
