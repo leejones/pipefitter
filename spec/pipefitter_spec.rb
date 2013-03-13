@@ -29,7 +29,9 @@ describe Pipefitter do
       archive_file = "#{rails_root}/tmp/pipefitter/63af33df99e1f88bff6d3696f4ae6686.tar.gz"
       File.exists?(archive_file).should be_true
       `cd #{test_root} && tar -xzf #{archive_file}`
-      `find #{test_root}/assets -type f -exec md5 -q {} + | md5 -q`.strip.should eql(`find #{rails_root}/public/assets -type f -exec md5 -q {} + | md5 -q`.strip)
+      archived_assets_checksum = `find #{test_root}/assets -type f -exec md5 -q {} + | md5 -q`.strip
+      compiled_assets_checksum = `find #{rails_root}/public/assets -type f -exec md5 -q {} + | md5 -q`.strip
+      archived_assets_checksum.should eql(compiled_assets_checksum)
     end
 
     it 'only compiles when needed' do
