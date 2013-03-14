@@ -1,0 +1,85 @@
+require 'logger'
+
+class Pipefitter
+  class Cli
+    attr_reader :arguments
+
+    def self.run(arguments, options = {})
+      new(arguments, options).run
+    end
+
+    def initialize(arguments, options = {})
+      @arguments = arguments
+      @options = options
+    end
+
+    def run
+      if arguments.include?('--help')
+        logger.info help_text
+      else
+        Pipefitter.compile(path, compiler_options)
+      end
+    end
+
+    private
+
+    def path
+      path_argument || environment.fetch(:PWD)
+    end
+
+    def path_argument
+      arguments.reject { |arg| arg =~ /\A\-\-/ }.first
+    end
+
+    def environment
+      @environment ||= begin
+        environment = options.fetch(:environment)
+        symbolize_keys(environment)
+      end
+    end
+
+    def compiler_options
+      c_options = { :logger => logger }
+      if arguments.include?('--force')
+        c_options[:force] = true
+      end
+      if arguments.include?('--archive')
+        c_options[:archive] = true
+      end
+      c_options
+    end
+
+    def options
+      @options_with_symbolized_keys ||= symbolize_keys(@options)
+    end
+
+    def symbolize_keys(hash)
+      hash.inject({}) do |memo, (k, v)|
+        memo[k.to_sym] = v
+        memo
+      end
+    end
+
+    def logger
+      @logger ||= options.fetch(:logger, Pipefitter::Logger.new)
+    end
+
+    def help_text
+      <<-EOS
+# Pipefitter
+
+## Usage
+
+    pipefitter [project path] [options]
+
+### Arguments
+
+* project root - optional project path to compile (default: current working directory)
+* --force - forces a compile even when none is needed
+* --archive - archives the compile assets to tmp in the project root
+* --help - this help text :)
+EOS
+
+    end
+  end
+end

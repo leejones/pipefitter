@@ -1,12 +1,16 @@
+lib = File.expand_path('../../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'pipefitter/version'
 require 'fileutils'
 
 class Pipefitter
   autoload 'Compiler', 'pipefitter/compiler'
   autoload 'Checksum', 'pipefitter/checksum'
+  autoload 'Cli', 'pipefitter/cli'
   autoload 'Compressor', 'pipefitter/compressor'
   autoload 'Inventory', 'pipefitter/inventory'
   autoload 'Error', 'pipefitter/error'
+  autoload 'Logger', 'pipefitter/logger'
 
   attr_reader :base_path
 
@@ -37,13 +41,18 @@ class Pipefitter
   def compile_if_necessary
     if assets_need_compiling?
       use_archive_or_compile
+    else
+      logger.info 'No compile needed!'
     end
   end
 
   def use_archive_or_compile
     if inventory_can_be_used?
+      logger.info 'Using compiled assests from local archive'
       move_archived_assets_into_place
     else
+      logger.info 'Compiling assets...'
+      logger.info '(this might take a while)'
       compile_and_record_checksum
       archive
     end
@@ -63,6 +72,7 @@ class Pipefitter
 
   def archive
     if archiving_enabled?
+      logger.info 'Archiving assets...'
       compressor.compress("#{source_checksum}.tar.gz")
     end
   end
@@ -133,6 +143,10 @@ class Pipefitter
 
   def options
     @options
+  end
+
+  def logger
+    @logger ||= options.fetch(:logger, Pipefitter::Logger.new)
   end
 
   class CompilationError < Pipefitter::Error; end

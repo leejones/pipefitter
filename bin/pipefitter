@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+require File.expand_path('../../lib/pipefitter.rb', __FILE__)
+
+begin
+  Pipefitter::Cli.run(ARGV.clone, :environment => ENV.clone)
+rescue Interrupt
+  exit 0
+end
