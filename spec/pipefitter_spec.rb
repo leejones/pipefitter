@@ -64,6 +64,14 @@ describe Pipefitter do
       expect { Pipefitter.compile(rails_root) }.to raise_error(Pipefitter::CompilationError)
       File.exists?("#{rails_root}/tmp/pipefitter/checksum.txt").should be_false
     end
+
+    it 'forces a compile' do
+      Pipefitter.compile(rails_root)
+      compiler_stub = stub
+      Pipefitter::Compiler.stub(:new => compiler_stub)
+      compiler_stub.should_receive(:compile).and_return(true)
+      Pipefitter.compile(rails_root, :force => true)
+    end
   end
 
   describe Pipefitter::Compiler do

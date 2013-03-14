@@ -16,17 +16,12 @@ class Pipefitter
 
   def initialize(base_path, options = {})
     @base_path = base_path
-    @archive = options.fetch(:archive, false)
+    @options = options
   end
 
   def compile
     setup
-    if inventory_contains_compiled_assets?
-      move_archived_assets_into_place
-    elsif assets_need_compiling?
-      compile_and_record_checksum
-      archive
-    end
+    compile_if_necessary
   end
 
   def source_checksum
@@ -39,12 +34,31 @@ class Pipefitter
 
   private
 
+  def compile_if_necessary
+    if assets_need_compiling?
+      use_archive_or_compile
+    end
+  end
+
+  def use_archive_or_compile
+    if inventory_can_be_used?
+      move_archived_assets_into_place
+    else
+      compile_and_record_checksum
+      archive
+    end
+  end
+
   def compile_and_record_checksum
     if compiler.compile
       inventory.put(source_checksum, artifact_checksum)
     else
       raise CompilationError
     end
+  end
+
+  def inventory_can_be_used?
+    ! compile_forced? && inventory_contains_compiled_assets?
   end
 
   def archive
@@ -66,11 +80,11 @@ class Pipefitter
   end
 
   def assets_need_compiling?
-    inventory.get(source_checksum) != artifact_checksum
+    compile_forced? || inventory.get(source_checksum) != artifact_checksum
   end
 
   def archiving_enabled?
-    @archive
+    @archiving_enabled ||= options.fetch(:archive, false)
   end
 
   def workspace
@@ -111,6 +125,14 @@ class Pipefitter
     if expected_artifact_checksum != artifact_checksum
       raise CompilationError, 'Archived assets did match stored checksum!'
     end
+  end
+
+  def compile_forced?
+    options.fetch(:force, false)
+  end
+
+  def options
+    @options
   end
 
   class CompilationError < Pipefitter::Error; end
