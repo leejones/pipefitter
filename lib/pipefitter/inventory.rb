@@ -24,7 +24,7 @@ class Pipefitter
     def data
       @data ||= begin
         if File.exists?(data_file)
-          YAML.load_file(data_file)
+          YAML.load_file(data_file) || {}
         else
           FileUtils.touch(data_file)
           {}

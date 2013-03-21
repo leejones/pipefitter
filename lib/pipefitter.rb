@@ -42,18 +42,17 @@ class Pipefitter
     if assets_need_compiling?
       use_archive_or_compile
     else
-      logger.info 'No compile needed!'
+      logger.info 'Skipped compile because no changes were detected.'
     end
   end
 
   def use_archive_or_compile
     if inventory_can_be_used?
-      logger.info 'Using compiled assests from local archive'
       move_archived_assets_into_place
+      logger.info 'Used compiled assests from local archive!'
     else
-      logger.info 'Compiling assets...'
-      logger.info '(this might take a while)'
       compile_and_record_checksum
+      logger.info 'Finished compiling assets!'
       archive
     end
   end
@@ -72,17 +71,18 @@ class Pipefitter
 
   def archive
     if archiving_enabled?
-      logger.info 'Archiving assets...'
+      logger.info 'Started archiving assets...'
       compressor.compress("#{source_checksum}.tar.gz")
+      logger.info 'Finished archiving assets!'
     end
   end
 
   def compiler
-    @compiler ||= Compiler.new(base_path)
+    @compiler ||= Compiler.new(base_path, :logger => logger)
   end
 
   def compressor
-    @compressor ||= Compressor.new(base_path)
+    @compressor ||= Compressor.new(base_path, :logger => logger)
   end
 
   def inventory

@@ -1,5 +1,6 @@
 require File.expand_path('../../lib/pipefitter.rb', __FILE__)
 require 'fileutils' 
+require 'logger'
 
 class Pipefitter
   module SpecHelper
@@ -12,6 +13,10 @@ class Pipefitter
       FileUtils.mkdir_p(base_working_directory)
       app_source_path = File.expand_path('../support/stubbed_rails_app', __FILE__)
       FileUtils.cp_r(app_source_path, base_working_directory)
+    end
+
+    def null_logger
+      @null_logger ||= ::Logger.new('/dev/null')
     end
   end
 end

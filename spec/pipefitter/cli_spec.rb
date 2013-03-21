@@ -1,7 +1,8 @@
-require File.expand_path('../../../lib/pipefitter.rb', __FILE__)
-require 'logger'
+require File.expand_path('../../spec_helper.rb', __FILE__)
 
 describe Pipefitter::Cli do
+  include Pipefitter::SpecHelper
+
   it 'compiles a path' do
     Pipefitter.should_receive(:compile).with('/tmp/pipefitter_app', kind_of(Hash)).and_return(true)
     environment = { :PWD => '/tmp' }
@@ -35,11 +36,10 @@ describe Pipefitter::Cli do
   it 'helps' do
     Pipefitter.should_not_receive(:compile)
     environment = { :PWD => '/tmp/pipefitter_app' }
-    logger = Logger.new('/dev/null')
-    logger.should_receive(:info).with(/Usage/)
+    null_logger.should_receive(:info).with(/Usage/)
     Pipefitter::Cli.run(['--help'], {
       :environment => environment,
-      :logger => logger
+      :logger => null_logger
     })
   end
 end

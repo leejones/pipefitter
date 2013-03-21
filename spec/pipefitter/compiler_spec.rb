@@ -1,4 +1,5 @@
 require File.expand_path('../../spec_helper.rb', __FILE__)
+require 'logger'
 
 describe Pipefitter::Compiler do
   include Pipefitter::SpecHelper
@@ -11,7 +12,7 @@ describe Pipefitter::Compiler do
   end
 
   it 'compiles asstets' do
-    compiler = Pipefitter::Compiler.new(rails_root)
+    compiler = Pipefitter::Compiler.new(rails_root, :logger => null_logger)
     compiler.compile
     File.exists?("#{rails_root}/public/assets/manifest.yml").should be_true
   end
