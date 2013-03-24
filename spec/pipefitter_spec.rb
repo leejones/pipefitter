@@ -11,7 +11,7 @@ describe Pipefitter do
     stub_rails_app(test_root, :destroy_initially => true)
   end
 
-  it 'compiles asstets' do
+  it 'compiles assets' do
     Pipefitter.compile(rails_root, :logger => null_logger)
     manifest_file = "#{rails_root}/public/assets/manifest.yml"
     File.exists?(manifest_file).should be_true

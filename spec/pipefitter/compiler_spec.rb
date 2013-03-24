@@ -11,7 +11,7 @@ describe Pipefitter::Compiler do
     stub_rails_app(test_root, :destroy_initially => true)
   end
 
-  it 'compiles asstets' do
+  it 'compiles assets' do
     compiler = Pipefitter::Compiler.new(rails_root, :logger => null_logger)
     compiler.compile
     File.exists?("#{rails_root}/public/assets/manifest.yml").should be_true
