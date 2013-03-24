@@ -14,7 +14,7 @@ class Pipefitter
     end
 
     def run
-      if arguments.include?('--help')
+      if help_requested?
         logger.info help_text
       else
         Pipefitter.compile(path, compiler_options)
@@ -62,6 +62,10 @@ class Pipefitter
 
     def logger
       @logger ||= options.fetch(:logger, Pipefitter::Logger.new)
+    end
+
+    def help_requested?
+      arguments.include?('--help')
     end
 
     def help_text
