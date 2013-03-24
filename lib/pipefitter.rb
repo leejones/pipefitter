@@ -78,7 +78,10 @@ class Pipefitter
   end
 
   def compiler
-    @compiler ||= Compiler.new(base_path, :logger => logger)
+    @compiler ||= Compiler.new(base_path,
+      :logger => logger,
+      :command => options[:command]
+    )
   end
 
   def compressor

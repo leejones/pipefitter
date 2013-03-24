@@ -28,7 +28,9 @@ class Pipefitter
     end
 
     def path_argument
-      arguments.reject { |arg| arg =~ /\A\-\-/ }.first
+      arguments.reject do |arg|
+        arg =~ /\A\-\-/ || arg == command_argument
+      end.first
     end
 
     def environment
@@ -46,11 +48,24 @@ class Pipefitter
       if arguments.include?('--archive')
         c_options[:archive] = true
       end
+      if arguments.include?('--command')
+        c_options[:command] = command_argument
+      end
       c_options
     end
 
     def options
       @options_with_symbolized_keys ||= symbolize_keys(@options)
+    end
+
+    def command_argument
+      @command_argument ||= begin
+        if arguments.include?('--command')
+          arguments[arguments.index('--command') + 1]
+        else
+          nil
+        end
+      end
     end
 
     def symbolize_keys(hash)

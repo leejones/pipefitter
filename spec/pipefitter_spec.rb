@@ -72,4 +72,11 @@ describe Pipefitter do
     compiler_stub.should_receive(:compile).and_return(true)
     Pipefitter.compile(rails_root, :force => true, :logger => null_logger)
   end
+
+  it 'uses a custom compile command', :focus => true do
+    compiler_stub = stub
+    Pipefitter::Compiler.should_receive(:new).with('/tmp/pipefitter_tests/stubbed_rails_app', :logger => kind_of(Logger), :command => 'script/precompile_assets').and_return(compiler_stub)
+    compiler_stub.should_receive(:compile).and_return(true)
+    Pipefitter.compile(rails_root, :command => 'script/precompile_assets', :logger => null_logger)
+  end
 end

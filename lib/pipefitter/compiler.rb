@@ -18,7 +18,7 @@ class Pipefitter
     private
 
     def compile_command
-      options.fetch(:command, default_compile_command)
+      options[:command] || default_compile_command
     end
 
     def default_compile_command

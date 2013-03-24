@@ -42,4 +42,13 @@ describe Pipefitter::Cli do
       :logger => null_logger
     })
   end
+
+  it 'uses a custom command' do
+    Pipefitter.should_receive(:compile).with('/tmp/pipefitter_app', {
+      :logger => kind_of(Logger),
+      :command => 'script/precompile_assets'
+    }).and_return(true)
+    environment = { :PWD => '/tmp/pipefitter_app' }
+    Pipefitter::Cli.run(['--command', 'script/precompile_assets'], :environment => environment)
+  end
 end
