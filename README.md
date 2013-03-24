@@ -1,6 +1,6 @@
 # Pipefitter
 
-A tool for the asset pipeline for avoiding unnecessary compilation runs.
+A command-line tool that avoids unnecessary compiles when using the Rails Asset Pipeline.
 
 ## Installation
 
@@ -18,30 +18,30 @@ Or install it yourself as:
 
 ## Usage
 
-### compile assets
+The `pipefitter` command is a smart wrapper to use when compiling your assets:
 
-Pipefitter is a smart wrapper for your assets compilation task. Run it to
-compile your assets:
+    $ pipefitter
+    Running `bundle exec rake assets:precompile`...
+    Finished compiling assets!
 
-    pipefitter compile
-    Asset changes detected, compiling assets...
-    Asset compilation completed!
+It will automatically check if something changed that would require another compile:
 
-Then, you can run Pipefitter again to see if anything needs to be compiled:
+    $ pipefitter
+    Skipped compile because no changes were detected.
 
-    pipefitter compile
-    No asset changes detected, you're good to go!
+You can archive a compile in case it can be reused later (ex. switching back and forth between branches)
 
-If you are running into problems, you can force asset compilation:
+    pipefitter --archive
+    rm -rf public/assets # oh no!
+    pipefitter
+    Used compiled assests from local archive!
+    # boom. didn't even need to recompile
 
-    pipefitter compile --force
+If something seems out of sorts, you can force asset compilation:
 
-By default, pipefitter runs `rake assets:precompile`. If you need to run a custom
-script or rake task you can pass the `--command` option:
-
-    pipefitter command --command "script/custom_compile"
-
-
+    $ pipefitter --force
+    Running `bundle exec rake assets:precompile`...
+    Finished compiling assets!
 
 ## Contributing
 
