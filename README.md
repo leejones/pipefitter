@@ -31,13 +31,19 @@ It will automatically check if something changed that would require another comp
 
 You can archive a compile in case it can be reused later (ex. switching back and forth between branches)
 
-    pipefitter --archive
-    rm -rf public/assets # oh no!
-    pipefitter
+    $ pipefitter --archive
+    $ rm -rf public/assets # oh no!
+    $ pipefitter
     Used compiled assests from local archive!
     # boom. didn't even need to recompile
 
-If something seems out of sorts, you can force asset compilation:
+Run a custom compile command:
+
+    $ pipefitter --command script/awesome_compile
+    Running `script/awesome_compile`...
+    Finished compiling assets!
+
+If something seems out of sorts with the change detection, you can force asset compilation:
 
     $ pipefitter --force
     Running `bundle exec rake assets:precompile`...
