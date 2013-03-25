@@ -110,13 +110,26 @@ class Pipefitter
   end
 
   def source_paths
-    paths = %w{
+    standard_paths | optional_paths
+  end
+
+  def standard_paths
+    %w{
       Gemfile
       Gemfile.lock
       app/assets
+    }.map { |path| File.join(base_path, path) }
+  end
+
+  def optional_paths
+    %w{
       lib/assets
       vendor/assets
-    }.map { |p| File.join(base_path, p) }
+    }.map do |path|
+      File.join(base_path, path)
+    end.select do |path|
+      File.exists?(path)
+    end
   end
 
   def artifact_paths

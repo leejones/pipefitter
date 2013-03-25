@@ -79,4 +79,12 @@ describe Pipefitter do
     compiler_stub.should_receive(:compile).and_return(true)
     Pipefitter.compile(rails_root, :command => 'script/precompile_assets', :logger => null_logger)
   end
+
+  it 'skips optional directories if they do not exist' do
+    FileUtils.rm_r(File.join(rails_root, 'lib/assets'))
+    FileUtils.rm_r(File.join(rails_root, 'vendor/assets'))
+    Pipefitter.compile(rails_root, :logger => null_logger)
+    manifest_file = "#{rails_root}/public/assets/manifest.yml"
+    File.exists?(manifest_file).should be_true
+  end
 end
