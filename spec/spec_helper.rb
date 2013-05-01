@@ -1,6 +1,7 @@
 require File.expand_path('../../lib/pipefitter.rb', __FILE__)
 require 'fileutils' 
 require 'logger'
+require 'pry'
 
 class Pipefitter
   module SpecHelper
