@@ -8,7 +8,8 @@ class Pipefitter
   autoload 'Checksum', 'pipefitter/checksum'
   autoload 'Cli', 'pipefitter/cli'
   autoload 'Compressor', 'pipefitter/compressor'
-  autoload 'Inventory', 'pipefitter/inventory'
+  autoload 'Archive', 'pipefitter/archive'
+  autoload 'Artifact', 'pipefitter/artifact'
   autoload 'Error', 'pipefitter/error'
   autoload 'Logger', 'pipefitter/logger'
 
@@ -47,34 +48,28 @@ class Pipefitter
   end
 
   def use_archive_or_compile
-    if inventory_can_be_used?
+    if archive_can_be_used?
       move_archived_assets_into_place
       logger.info 'Used compiled assests from local archive!'
     else
-      compile_and_record_checksum
+      compile!
       logger.info 'Finished compiling assets!'
-      archive
+      archive!
     end
   end
 
-  def compile_and_record_checksum
-    if compiler.compile
-      inventory.put(source_checksum, artifact_checksum)
-    else
-      raise CompilationError
-    end
+  def compile!
+    compiler.compile or raise CompilationError
   end
 
-  def inventory_can_be_used?
-    ! compile_forced? && inventory_contains_compiled_assets?
+  def archive_can_be_used?
+    ! compile_forced? && archive_contains_compiled_assets?
   end
 
-  def archive
-    if archiving_enabled?
-      logger.info 'Started archiving assets...'
-      compressor.compress("#{source_checksum}.tar.gz")
-      logger.info 'Finished archiving assets!'
-    end
+  def archive!
+    logger.info 'Started archiving assets...'
+    archive.put(File.join(base_path, 'public', 'assets', source_checksum))
+    logger.info 'Finished archiving assets!'
   end
 
   def compiler
@@ -84,23 +79,18 @@ class Pipefitter
     )
   end
 
-  def compressor
-    @compressor ||= Compressor.new(base_path, :logger => logger)
-  end
-
-  def inventory
-    @inventory ||= Inventory.new(workspace)
+  def archive
+    @archive ||= Archive.new(
+      File.join(workspace, 'archive'),
+      :logger => logger
+    )
   end
 
   def assets_need_compiling?
-    compile_forced? || inventory.get(source_checksum) != artifact_checksum
+    compile_forced? || archive.get(source_checksum).checksum != artifact_checksum
   end
 
-  def archiving_enabled?
-    @archiving_enabled ||= options.fetch(:archive, false)
-  end
-
-  def workspace
+  def  def workspace
     File.join(base_path, 'tmp', 'pipefitter')
   end
 
@@ -138,19 +128,12 @@ class Pipefitter
     }.map { |p| File.join(base_path, p) }
   end
 
-  def inventory_contains_compiled_assets?
-    inventory_path = File.join(workspace, "#{source_checksum}.tar.gz")
-    inventory.get(source_checksum) && File.exists?(inventory_path)
+  def archive_contains_compiled_assets?
+    archive.includes?(source_checksum)
   end
 
   def move_archived_assets_into_place
-    inventory_path = File.join(workspace, "#{source_checksum}.tar.gz")
-    FileUtils.rm_rf("#{base_path}/public/assets")
-    `cd #{base_path}/public && tar -xzf #{inventory_path}`
-    expected_artifact_checksum = inventory.get(source_checksum)
-    if expected_artifact_checksum != artifact_checksum
-      raise CompilationError, 'Archived assets did match stored checksum!'
-    end
+    archive.get(source_checksum).expand_to(File.join(base_path, 'public'))
   end
 
   def compile_forced?

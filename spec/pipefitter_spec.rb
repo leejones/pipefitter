@@ -17,13 +17,14 @@ describe Pipefitter do
     File.exists?(manifest_file).should be_true
   end
 
-  it 'records a checksum' do
+  # TODO change to archive
+  it 'archives a compile' do
     Pipefitter.compile(rails_root, :logger => null_logger)
-    inventory_file = "#{rails_root}/tmp/pipefitter/inventory.yml"
-    checksums = YAML.load_file(inventory_file)
-    checksums.has_key?('63af33df99e1f88bff6d3696f4ae6686').should be_true
+    File.exists?(File.join(rails_root, '63af33df99e1f88bff6d3696f4ae6686.tar.gz')).should be_true
+    File.exists?(File.join(rails_root, '63af33df99e1f88bff6d3696f4ae6686.md5')).should be_true
   end
 
+  # TODO change to archive
   it 'stores an archived copy of compiled assets' do
     Pipefitter.compile(rails_root, :archive => true, :logger => null_logger)
     archive_file = "#{rails_root}/tmp/pipefitter/63af33df99e1f88bff6d3696f4ae6686.tar.gz"
@@ -34,6 +35,7 @@ describe Pipefitter do
     archived_assets_checksum.should eql(compiled_assets_checksum)
   end
 
+  # TODO change to archive
   it 'uses an archived copy of compiled assets when available' do
     Pipefitter.compile(rails_root, :archive => true, :logger => null_logger)
     original_checksum = Pipefitter::Checksum.new("#{rails_root}/public/assets").checksum
@@ -46,6 +48,7 @@ describe Pipefitter do
     final_checksum.should eql(original_checksum)
   end
 
+  # TODO change to archive
   it 'only compiles when needed' do
     FileUtils.mkdir_p("#{rails_root}/tmp/pipefitter")
     File.open("#{rails_root}/tmp/pipefitter/inventory.yml", 'w+') do |file|
@@ -59,6 +62,7 @@ describe Pipefitter do
     Pipefitter.compile(rails_root, :logger => null_logger)
   end
 
+  # TODO change to archive
   it 'does not record a checksum if the compile fails' do
     FileUtils.rm("#{rails_root}/Rakefile")
     expect { Pipefitter.compile(rails_root, :logger => null_logger) }.to raise_error(Pipefitter::CompilationError)
