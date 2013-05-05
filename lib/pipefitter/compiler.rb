@@ -23,7 +23,7 @@ class Pipefitter
 
     def default_compile_command
       if using_bundler?
-        'bundle exec rake assets:precompile'
+        "BUNDLE_GEMFILE=#{gemfile} bundle exec rake assets:precompile"
       else
         'rake assets:precompile'
       end
