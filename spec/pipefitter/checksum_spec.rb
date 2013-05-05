@@ -19,6 +19,6 @@ describe Pipefitter::Checksum do
       vendor/assets
     }.map { |p| File.join(rails_root, p) }
     checksum = Pipefitter::Checksum.new(paths)
-    checksum.checksum.should eql('63af33df99e1f88bff6d3696f4ae6686')
+    checksum.checksum.should eql('1146bbf7a93640fc4054defc8be871e7')
   end
 end
