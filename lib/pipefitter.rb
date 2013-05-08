@@ -68,7 +68,7 @@ class Pipefitter
 
   def archive!
     logger.info 'Started archiving assets...'
-    archive.put(File.join(base_path, 'public', 'assets', source_checksum))
+    archive.put(File.join(base_path, 'public', 'assets'), source_checksum)
     logger.info 'Finished archiving assets!'
   end
 
@@ -87,10 +87,10 @@ class Pipefitter
   end
 
   def assets_need_compiling?
-    compile_forced? || archive.get(source_checksum).checksum != artifact_checksum
+    compile_forced? || ! archive_contains_compiled_assets? || (archive_contains_compiled_assets? && archive.get(source_checksum).checksum != artifact_checksum)
   end
 
-  def  def workspace
+  def workspace
     File.join(base_path, 'tmp', 'pipefitter')
   end
 
@@ -129,7 +129,7 @@ class Pipefitter
   end
 
   def archive_contains_compiled_assets?
-    archive.includes?(source_checksum)
+    archive.get(source_checksum) != nil
   end
 
   def move_archived_assets_into_place

@@ -12,11 +12,11 @@ describe Pipefitter::Artifact do
 
   let(:test_root) { '/tmp/pipefitter_tests' }
   let(:rails_root) { "#{test_root}/stubbed_rails_app" }
-  let(:artifact_path) { File.join(test_root, 'artifact.tar.gz') }
+  let(:artifact_prefix) { File.join(test_root, 'artifact') }
+  let(:artifact_path) { "#{artifact_prefix}.tar.gz" }
   let(:artifact_checksum) { 'abc-123-checksum' }
   let(:public_path) { File.join(rails_root, 'public') }
   let(:assets_path) { File.join(public_path, 'assets') }
-  let(:artifact) { Pipefitter::Artifact.new(artifact_path, artifact_checksum) }
 
   subject { Pipefitter::Artifact.new(artifact_path, artifact_checksum) }
 
@@ -26,6 +26,13 @@ describe Pipefitter::Artifact do
 
   it 'has a checksum' do
     subject.checksum.should eql(artifact_checksum)
+  end
+
+  it 'derives a checksum' do
+    File.should_receive(:exists?).with("#{artifact_prefix}.md5").and_return(true)
+    File.should_receive(:read).with("#{artifact_prefix}.md5").and_return('xyz-543-checksum')
+    artifact = Pipefitter::Artifact.new(artifact_path)
+    artifact.checksum.should eql('xyz-543-checksum')
   end
 
   describe 'expand_to' do
@@ -54,10 +61,10 @@ describe Pipefitter::Artifact do
   end
 
   describe 'create' do
-    subject { Pipefitter::Artifact.create(assets_path, artifact_path) }
+    subject { Pipefitter::Artifact.create(assets_path, artifact_prefix) }
 
     it 'returns an artifact instance' do
-      subject.path.should eql(artifact_path)
+      subject.path.should eql("#{artifact_prefix}.tar.gz")
       subject.checksum.should eql(Pipefitter::Checksum.checksum(assets_path))
     end
 
@@ -66,7 +73,8 @@ describe Pipefitter::Artifact do
     end
 
     it 'stores a checksum of the artifact' do
-      File.exists?("#{subject.path}.md5").should be_true
+      subject.checksum_path.should eql("#{artifact_prefix}.md5")
+      File.exists?("#{artifact_prefix}.md5").should be_true
     end
   end
 end

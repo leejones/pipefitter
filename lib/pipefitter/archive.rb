@@ -24,7 +24,8 @@ class Pipefitter
     def put(artifact_path, key)
       prefix = Time.now.to_i
       full_key = [prefix, key].join('-')
-      Pipefitter::Artifact.create(artifact_path, full_key)
+      full_key_path = File.join(path, full_key)
+      Pipefitter::Artifact.create(artifact_path, full_key_path)
     end
 
     def purge
