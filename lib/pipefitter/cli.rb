@@ -45,9 +45,6 @@ class Pipefitter
       if arguments.include?('--force')
         c_options[:force] = true
       end
-      if arguments.include?('--archive')
-        c_options[:archive] = true
-      end
       if arguments.include?('--command')
         c_options[:command] = command_argument
       end
@@ -95,7 +92,6 @@ class Pipefitter
 
 * project root - optional project path to compile (default: current working directory)
 * --force - forces a compile even when none is needed
-* --archive - archives the compile assets to tmp in the project root
 * --help - this help text :)
 EOS
 

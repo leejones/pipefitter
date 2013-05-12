@@ -26,11 +26,10 @@ describe Pipefitter::Cli do
 
   it 'archives' do
     Pipefitter.should_receive(:compile).with('/tmp/pipefitter_app', {
-      :logger => kind_of(Logger),
-      :archive => true
+      :logger => kind_of(Logger)
     }).and_return(true)
     environment = { :PWD => '/tmp/pipefitter_app' }
-    Pipefitter::Cli.run(['--archive'], :environment => environment)
+    Pipefitter::Cli.run([], :environment => environment)
   end
 
   it 'helps' do
