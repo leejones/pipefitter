@@ -20,7 +20,7 @@ class Pipefitter
         nil
       end
     end
-    
+
     def put(artifact_path, key)
       prefix = Time.now.to_i
       full_key = [prefix, key].join('-')
@@ -41,7 +41,7 @@ class Pipefitter
     class KeyNotFound < RuntimeError; end
 
     private
-    
+
     def setup
       FileUtils.mkdir_p(path)
     end
