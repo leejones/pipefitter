@@ -8,7 +8,7 @@ class Pipefitter
     def initialize(path, options = {})
       @path = path
       @logger = options.fetch(:logger, default_logger)
-      @limit = 3
+      @limit = options.fetch(:limit, 3)
       setup
     end
 

@@ -70,8 +70,10 @@ class Pipefitter
 
   def archive!
     logger.info 'Started archiving assets...'
-    archive.put(File.join(base_path, 'public', 'assets'), source_checksum)
+    result = archive.put(File.join(base_path, 'public', 'assets'), source_checksum)
+    archive.purge
     logger.info 'Finished archiving assets!'
+    result
   end
 
   def compiler
@@ -84,7 +86,8 @@ class Pipefitter
   def archive
     @archive ||= Archive.new(
       File.join(workspace, 'archive'),
-      :logger => logger
+      :logger => logger,
+      :limit => 5
     )
   end
 

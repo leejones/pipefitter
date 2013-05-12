@@ -91,4 +91,13 @@ describe Pipefitter do
     manifest_file = "#{rails_root}/public/assets/manifest.yml"
     File.exists?(manifest_file).should be_true
   end
+
+  # TODO: speed up slow test
+  it 'purges old compiles after 5' do
+    6.times do
+      `echo 'mocking file updates' >> #{File.join(rails_root, 'app', 'assets', 'new_features.css')}`
+      Pipefitter.compile(rails_root, :logger => null_logger)
+    end
+    Dir.glob("#{archive_root}/*.tar.gz").count.should eql(5)
+  end
 end

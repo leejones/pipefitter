@@ -29,7 +29,7 @@ It will automatically check if something changed that would require another comp
     $ pipefitter
     Skipped compile because no changes were detected.
 
-Pipefitter automatically archives your compiles in case it can be reused later (ex. switching back and forth between branches). Archive will purge old compiles so you don't have to worry about them crufting up your disk.
+Pipefitter automatically archives your compiles in case it can be reused later (ex. switching back and forth between branches). It only keeps the last 5 compiles so you don't have to worry about filling your drive with old compiles.
 
     $ pipefitter
     $ rm -rf public/assets # oh no!
