@@ -39,6 +39,8 @@ class Pipefitter
 
   private
 
+  attr_reader :options
+
   def compile_if_necessary
     if assets_need_compiling?
       use_archive_or_compile
@@ -138,10 +140,6 @@ class Pipefitter
 
   def compile_forced?
     options.fetch(:force, false)
-  end
-
-  def options
-    @options
   end
 
   def logger
