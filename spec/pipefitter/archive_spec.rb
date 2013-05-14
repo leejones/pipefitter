@@ -19,8 +19,12 @@ describe Pipefitter::Archive do
   it 'gets an archived item by key' do
     FileUtils.mkdir_p(archive_root)
     FileUtils.touch(File.join(archive_root, '1365740400-abcd.tar.gz'))
-    FileUtils.touch(File.join(archive_root, '1365740400-abcd.md5'))
-    subject.get('abcd').should be_a(Pipefitter::Artifact)
+    File.open(File.join(archive_root, '1365740400-abcd.md5'), 'w+') do |file|
+      file.write 'stubbed-artifact-checksum123'
+    end
+    artifact = subject.get('abcd')
+    artifact.should be_a(Pipefitter::Artifact)
+    artifact.checksum.should eql('stubbed-artifact-checksum123')
   end
 
   it 'stores archived items with a timestamped key' do

@@ -14,7 +14,11 @@ class Pipefitter
 
     def get(key)
       if artifact = artifacts.find { |f| f =~ /.*#{key}.*/ }
-        checksum = checksums.find { |f| f =~ /.*\.md5/ }
+        if checksum_path = checksums.find { |f| f =~ /.*\.md5/ }
+          checksum = File.read(checksum_path)
+        else
+          checksum = nil
+        end
         Artifact.new(artifact, checksum)
       else
         nil
